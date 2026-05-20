@@ -293,7 +293,7 @@
 
 <script>
 const CASES = [
-  { name:'张三',idcard:'320282199001011234',time:'2026-05-19 09:15',dept:'卫生室',id:'VIS20260519001',
+  { name:'张三',idcard:'320282199001011234',time:'2026-05-19 09:15',dept:'乾潭镇梅塘村卫生室',id:'VIS20260519001',
     nodes:[
       {name:'患者扫码/刷卡',status:'success',time:'09:14:58'},
       {name:'体征上传',status:'success',time:'09:15:20'},
@@ -303,7 +303,7 @@ const CASES = [
       {name:'结算',status:'success',time:'09:23:52'},
       {name:'发药/库存扣减',status:'success',time:'09:25:30'}
     ]},
-  { name:'李四',idcard:'320282199205055678',time:'2026-05-19 09:32',dept:'卫生室',id:'VIS20260519002',
+  { name:'李四',idcard:'320282199205055678',time:'2026-05-19 09:32',dept:'大洋镇上源村卫生室',id:'VIS20260519002',
     nodes:[
       {name:'患者扫码/刷卡',status:'success',time:'09:31:50'},
       {name:'体征上传',status:'success',time:'09:32:15'},
@@ -313,7 +313,7 @@ const CASES = [
       {name:'结算',status:'error',time:'09:41:05'},
       {name:'发药/库存扣减',status:'pending',time:''}
     ]},
-  { name:'王五',idcard:'320282199308089012',time:'2026-05-19 10:05',dept:'卫生室',id:'VIS20260519003',
+  { name:'王五',idcard:'320282199308089012',time:'2026-05-19 10:05',dept:'新安江街道健康驿站',id:'VIS20260519003',
     nodes:[
       {name:'患者扫码/刷卡',status:'success',time:'10:04:50'},
       {name:'体征上传',status:'success',time:'10:05:12'},
@@ -371,7 +371,7 @@ const LOG_DATA = {
     2: {title:'挂号', status:'success', sections:[
       {title:'业务数据', type:'table', rows:[
         ['挂号号','GH20260519001'],
-        ['挂号科室','卫生室'],
+        ['挂号科室','乾潭镇梅塘村卫生室'],
         ['接诊医生','刘医生（D012）'],
         ['挂号类型','普通门诊'],
         ['挂号费','¥10.00'],
@@ -402,7 +402,7 @@ const LOG_DATA = {
         ['请求头','Content-Type: application/json; Authorization: Bearer ***'],
         ['请求内容','{"patientId":"P20260519001","doctorId":"D012","deptCode":"WSS","slotNo":3}'],
         ['响应时间','2026-05-19 09:15:45'],
-        ['响应内容','{"code":200,"regNo":"GH20260519001","deptName":"卫生室","doctorName":"刘医生","fee":10.00}'],
+        ['响应内容','{"code":200,"regNo":"GH20260519001","deptName":"乾潭镇梅塘村卫生室","doctorName":"刘医生","fee":10.00}'],
         ['平台接收时间','2026-05-19 09:15:45'],
         ['耗时','128ms']
       ]}
@@ -585,7 +585,7 @@ const LOG_DATA = {
     2: {title:'挂号', status:'success', sections:[
       {title:'业务数据', type:'table', rows:[
         ['挂号号','GH20260519002'],
-        ['挂号科室','卫生室'],
+        ['挂号科室','大洋镇上源村卫生室'],
         ['接诊医生','陈医生（D008）'],
         ['挂号类型','普通门诊'],
         ['挂号费','¥10.00'],
@@ -616,7 +616,7 @@ const LOG_DATA = {
         ['请求头','Content-Type: application/json; Authorization: Bearer ***'],
         ['请求内容','{"patientId":"P20260519002","doctorId":"D008","deptCode":"WSS","slotNo":7}'],
         ['响应时间','2026-05-19 09:32:40'],
-        ['响应内容','{"code":200,"regNo":"GH20260519002","deptName":"卫生室","doctorName":"陈医生","fee":10.00}'],
+        ['响应内容','{"code":200,"regNo":"GH20260519002","deptName":"大洋镇上源村卫生室","doctorName":"陈医生","fee":10.00}'],
         ['平台接收时间','2026-05-19 09:32:40'],
         ['耗时','135ms']
       ]}
@@ -752,7 +752,7 @@ const LOG_DATA = {
     2: {title:'挂号', status:'success', sections:[
       {title:'业务数据', type:'table', rows:[
         ['挂号号','GH20260519003'],
-        ['挂号科室','卫生室'],
+        ['挂号科室','新安江街道健康驿站'],
         ['接诊医生','刘医生（D012）'],
         ['挂号类型','普通门诊'],
         ['挂号费','¥10.00'],
@@ -783,7 +783,7 @@ const LOG_DATA = {
         ['请求头','Content-Type: application/json; Authorization: Bearer ***'],
         ['请求内容','{"patientId":"P20260519003","doctorId":"D012","deptCode":"WSS","slotNo":11}'],
         ['响应时间','2026-05-19 10:05:38'],
-        ['响应内容','{"code":200,"regNo":"GH20260519003","deptName":"卫生室","doctorName":"刘医生","fee":10.00}'],
+        ['响应内容','{"code":200,"regNo":"GH20260519003","deptName":"新安江街道健康驿站","doctorName":"刘医生","fee":10.00}'],
         ['平台接收时间','2026-05-19 10:05:38'],
         ['耗时','142ms']
       ]}
