@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>就诊流程闭环日志</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; overflow: hidden; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', sans-serif;
+      background: #f0f2f5;
+      height: 100%;
+      display: flex;
+    }
+    .sidebar {
+      width: 220px;
+      background: linear-gradient(180deg, #1a2744 0%, #1e3a5f 100%);
+      height: 100vh;
+      padding: 20px 0;
+      flex-shrink: 0;
+      position: fixed;
+      left: 0;
+      top: 0;
+      overflow-y: auto;
+    }
+    .sidebar-logo {
+      padding: 0 20px 24px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .sidebar-logo-icon {
+      width: 36px; height: 36px; background: #4361EE; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .sidebar-logo-text { color: white; font-size: 15px; font-weight: 600; }
+    .sidebar-menu { list-style: none; }
+    .sidebar-menu li {
+      padding: 12px 20px; color: rgba(255,255,255,0.6); font-size: 14px;
+      cursor: pointer; display: flex; align-items: center; gap: 10px;
+    }
+    .sidebar-menu li:hover { color: rgba(255,255,255,0.9); background: rgba(255,255,255,0.05); }
+    .sidebar-menu li.active {
+      color: white; background: rgba(67,97,238,0.25);
+      border-right: 3px solid #4361EE; font-weight: 500;
+    }
+    .menu-icon { width: 18px; height: 18px; border-radius: 4px; background: rgba(255,255,255,0.15); }
+    .main { flex: 1; display: flex; flex-direction: column; min-width: 0; margin-left: 220px; height: 100vh; }
+    .topbar {
+      background: white; padding: 14px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid #e8e8e8;
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .topbar-title { font-size: 16px; font-weight: 600; color: #1a1a1a; }
+    .topbar-user { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #666; }
+    .topbar-avatar { width: 32px; height: 32px; border-radius: 50%; background: #e0e0e0; }
+    .content { flex: 1; padding: 24px; overflow-y: auto; }
+    .page { display: none; }
+    .page.active { display: block; }
+    #page-detail.active { display: flex; flex-direction: column; height: 100%; }
+    .search-panel {
+      background: white; border-radius: 8px; padding: 20px 24px;
+      margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .search-row { display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap; }
+    .search-field { display: flex; flex-direction: column; gap: 6px; }
+    .search-field label { font-size: 13px; color: #666; }
+    .search-field input {
+      border: 1px solid #d9d9d9; border-radius: 6px; padding: 8px 12px;
+      font-size: 14px; width: 180px; outline: none;
+    }
+    .search-field input:focus { border-color: #4361EE; }
+    .btn-primary {
+      background: #4361EE; color: white; border: none; border-radius: 6px;
+      padding: 9px 20px; font-size: 14px; cursor: pointer; font-weight: 500;
+    }
+    .btn-primary:hover { background: #3451d1; }
+    .btn-reset {
+      background: white; color: #666; border: 1px solid #d9d9d9;
+      border-radius: 6px; padding: 9px 20px; font-size: 14px; cursor: pointer;
+    }
+    .table-panel {
+      background: white; border-radius: 8px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06); overflow: hidden;
+    }
+    .table-title {
+      padding: 16px 24px; font-size: 15px; font-weight: 600;
+      color: #1a1a1a; border-bottom: 1px solid #f0f0f0;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      background: #fafafa; padding: 12px 16px; font-size: 13px;
+      color: #666; font-weight: 500; text-align: left; border-bottom: 1px solid #f0f0f0;
+    }
+    tbody td { padding: 14px 16px; font-size: 14px; color: #333; border-bottom: 1px solid #f5f5f5; }
+    tbody tr:hover { background: #f8f9ff; }
+    .status-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+    .status-success { background: #e8f5e9; color: #2e7d32; }
+    .status-error { background: #fce4ec; color: #c62828; }
+    .status-progress { background: #e3f2fd; color: #1565c0; }
+    .btn-detail {
+      color: #4361EE; background: none; border: none;
+      font-size: 13px; cursor: pointer; text-decoration: underline;
+    }
+    .pagination {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 24px; border-top: 1px solid #f0f0f0;
+    }
+    .page-info { font-size: 13px; color: #999; }
+    .page-btns { display: flex; gap: 4px; }
+    .page-btn {
+      width: 32px; height: 32px; border: 1px solid #d9d9d9; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; color: #333; cursor: pointer; background: white;
+    }
+    .page-btn.active { background: #4361EE; color: white; border-color: #4361EE; }
+    .detail-back {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 14px; color: #4361EE; cursor: pointer; margin-bottom: 16px;
+      flex-shrink: 0;
+    }
+    .patient-card {
+      background: white; border-radius: 8px; padding: 20px 24px;
+      margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      flex-shrink: 0;
+    }
+    .patient-info { display: flex; gap: 24px; flex-wrap: wrap; }
+    .patient-field { display: flex; flex-direction: column; gap: 4px; }
+    .patient-field .label { font-size: 12px; color: #999; }
+    .patient-field .value { font-size: 14px; color: #333; font-weight: 500; }
+    .detail-layout { display: flex; gap: 16px; align-items: stretch; flex: 1; min-height: 0; }
+    .flow-panel {
+      width: 220px; background: white; border-radius: 8px;
+      padding: 20px 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); flex-shrink: 0;
+      overflow-y: auto;
+    }
+    .flow-title {
+      font-size: 14px; font-weight: 600; color: #333;
+      margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid #f0f0f0;
+    }
+    .flow-list { position: relative; padding-left: 20px; }
+    .flow-list::before {
+      content: ''; position: absolute; left: 8px; top: 12px; bottom: 12px;
+      width: 2px; background: #e8e8e8;
+    }
+    .flow-node {
+      position: relative; padding: 8px 12px; margin-bottom: 2px;
+      border-radius: 6px; cursor: pointer;
+    }
+    .flow-node:hover { background: #f8f9fc; }
+    .flow-node.active { background: #eef2ff; }
+    .flow-node::before {
+      content: ''; position: absolute; left: -16px; top: 12px;
+      width: 12px; height: 12px; border-radius: 50%;
+      border: 2px solid #d9d9d9; background: white;
+    }
+    .flow-node.success::before { border-color: #4caf50; background: #4caf50; }
+    .flow-node.error::before { border-color: #e53935; background: #e53935; }
+    .flow-node.progress::before { border-color: #1565c0; background: #1565c0; animation: pulse 1.5s infinite; }
+    .flow-node.pending::before { border-color: #d9d9d9; background: #f5f5f5; }
+    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+    .flow-node-name { font-size: 13px; font-weight: 500; color: #333; }
+    .flow-node.pending .flow-node-name { color: #bbb; }
+    .flow-node.error .flow-node-name { color: #c62828; }
+    .flow-node.progress .flow-node-name { color: #1565c0; }
+    .flow-node-time { font-size: 11px; color: #4caf50; margin-top: 2px; }
+    .flow-node.error .flow-node-time { color: #e53935; }
+    .flow-node.progress .flow-node-time { color: #1565c0; }
+    .flow-node.pending .flow-node-time { color: #ccc; }
+    .log-panel {
+      flex: 1; background: white; border-radius: 8px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06); min-height: 0;
+      overflow-y: auto;
+    }
+    .log-panel-header {
+      padding: 16px 24px; border-bottom: 1px solid #f0f0f0;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .log-panel-title { font-size: 15px; font-weight: 600; color: #1a1a1a; }
+    .log-panel-status { font-size: 12px; padding: 3px 10px; border-radius: 12px; }
+    .log-panel-status.success { background: #e8f5e9; color: #2e7d32; }
+    .log-panel-status.error { background: #fce4ec; color: #c62828; }
+    .log-panel-status.progress { background: #e3f2fd; color: #1565c0; }
+    .log-panel-status.pending { background: #f5f5f5; color: #999; }
+    .log-panel-body { padding: 20px 24px; }
+    .log-section { margin-bottom: 16px; }
+    .log-section:last-child { margin-bottom: 0; }
+    .log-section-title {
+      font-size: 13px; font-weight: 600; color: #666; margin-bottom: 8px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .log-section-title::before {
+      content: ''; width: 3px; height: 14px; background: #4361EE; border-radius: 2px;
+    }
+    .log-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .log-table tr { border-bottom: 1px solid #f5f5f5; }
+    .log-table tr:last-child { border-bottom: none; }
+    .log-table td { padding: 10px 12px; vertical-align: top; }
+    .log-table td:first-child {
+      width: 110px; color: #999; font-weight: 500; white-space: nowrap;
+    }
+    .log-table td:last-child { color: #333; word-break: break-all; }
+    .log-block {
+      background: #f8f9fc; border-radius: 6px; padding: 12px 16px;
+      font-size: 13px; color: #555; line-height: 1.7;
+      font-family: 'SF Mono', 'Menlo', monospace; white-space: pre-wrap;
+    }
+    .log-block.error-block {
+      background: #fff5f5; color: #c62828; border-left: 3px solid #e53935;
+    }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-icon"><svg width="20" height="20" viewBox="0 0 20 20"><rect x="3" y="3" width="14" height="14" rx="3" fill="white"/></svg></div>
+    <span class="sidebar-logo-text">JUYI Health</span>
+  </div>
+  <ul class="sidebar-menu">
+    <li><div class="menu-icon"></div>首页概览</li>
+    <li><div class="menu-icon"></div>患者管理</li>
+    <li class="active"><div class="menu-icon"></div>就诊流程日志</li>
+    <li><div class="menu-icon"></div>系统设置</li>
+  </ul>
+</div>
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title">就诊流程闭环日志</div>
+    <div class="topbar-user"><span>管理员</span><div class="topbar-avatar"></div></div>
+  </div>
+  <div class="content">
+    <!-- PAGE 1: 列表页 -->
+    <div id="page-list" class="page active">
+      <div class="search-panel">
+        <div class="search-row">
+          <div class="search-field"><label>患者姓名</label><input type="text" placeholder="请输入姓名"></div>
+          <div class="search-field"><label>身份证号</label><input type="text" placeholder="请输入身份证号"></div>
+          <div class="search-field"><label>就诊时间</label><input type="date" value="2026-05-19"></div>
+          <button class="btn-primary">查询</button>
+          <button class="btn-reset">重置</button>
+        </div>
+      </div>
+      <div class="table-panel">
+        <div class="table-title">就诊记录列表</div>
+        <table>
+          <thead><tr><th>就诊编号</th><th>患者姓名</th><th>身份证号</th><th>就诊时间</th><th>科室</th><th>流程状态</th><th>操作</th></tr></thead>
+          <tbody>
+            <tr><td>VIS20260519001</td><td>张三</td><td>320282****1234</td><td>2026-05-19 09:15</td><td>全科</td><td><span class="status-tag status-success">已完成</span></td><td><button class="btn-detail" onclick="showDetail(0)">查看详情</button></td></tr>
+            <tr><td>VIS20260519002</td><td>李四</td><td>320282****5678</td><td>2026-05-19 09:32</td><td>内科</td><td><span class="status-tag status-error">异常</span></td><td><button class="btn-detail" onclick="showDetail(1)">查看详情</button></td></tr>
+            <tr><td>VIS20260519003</td><td>王五</td><td>320282****9012</td><td>2026-05-19 10:05</td><td>全科</td><td><span class="status-tag status-progress">进行中</span></td><td><button class="btn-detail" onclick="showDetail(2)">查看详情</button></td></tr>
+            <tr><td>VIS20260519004</td><td>赵六</td><td>320282****3456</td><td>2026-05-19 10:28</td><td>中医科</td><td><span class="status-tag status-success">已完成</span></td><td><button class="btn-detail" onclick="showDetail(0)">查看详情</button></td></tr>
+            <tr><td>VIS20260519005</td><td>孙七</td><td>320282****7890</td><td>2026-05-19 11:02</td><td>全科</td><td><span class="status-tag status-error">异常</span></td><td><button class="btn-detail" onclick="showDetail(1)">查看详情</button></td></tr>
+          </tbody>
+        </table>
+        <div class="pagination">
+          <div class="page-info">共 23 条记录，第 1/5 页</div>
+          <div class="page-btns"><div class="page-btn">&lt;</div><div class="page-btn active">1</div><div class="page-btn">2</div><div class="page-btn">3</div><div class="page-btn">&gt;</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE 2: 详情页 -->
+    <div id="page-detail" class="page">
+      <div class="detail-back" onclick="showList()">
+        <svg width="16" height="16" viewBox="0 0 16 16"><path d="M10 12L6 8L10 4" stroke="#4361EE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        返回列表
+      </div>
+      <div class="patient-card">
+        <div class="patient-info">
+          <div class="patient-field"><span class="label">患者姓名</span><span class="value" id="d-name">张三</span></div>
+          <div class="patient-field"><span class="label">身份证号</span><span class="value" id="d-idcard">320282****1234</span></div>
+          <div class="patient-field"><span class="label">就诊时间</span><span class="value" id="d-time">2026-05-19 09:15</span></div>
+          <div class="patient-field"><span class="label">就诊科室</span><span class="value" id="d-dept">全科</span></div>
+          <div class="patient-field"><span class="label">就诊编号</span><span class="value" id="d-id">VIS20260519001</span></div>
+        </div>
+      </div>
+      <div class="detail-layout">
+        <div class="flow-panel">
+          <div class="flow-title">就诊流程节点</div>
+          <div class="flow-list" id="flow-list"></div>
+        </div>
+        <div class="log-panel">
+          <div id="log-content"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const CASES = [
+  { name:'张三',idcard:'320282****1234',time:'2026-05-19 09:15',dept:'全科',id:'VIS20260519001',
+    nodes:[
+      {name:'患者扫码/刷卡',status:'success',time:'09:14:58'},
+      {name:'体征上传',status:'success',time:'09:15:20'},
+      {name:'挂号',status:'success',time:'09:15:45'},
+      {name:'视频问诊',status:'success',time:'09:18:02'},
+      {name:'开处方',status:'success',time:'09:22:10'},
+      {name:'结算',status:'success',time:'09:23:52'},
+      {name:'发药',status:'success',time:'09:25:30'},
+      {name:'库存扣减',status:'success',time:'09:25:31'}
+    ]},
+  { name:'李四',idcard:'320282****5678',time:'2026-05-19 09:32',dept:'内科',id:'VIS20260519002',
+    nodes:[
+      {name:'患者扫码/刷卡',status:'success',time:'09:31:50'},
+      {name:'体征上传',status:'success',time:'09:32:15'},
+      {name:'挂号',status:'success',time:'09:32:40'},
+      {name:'视频问诊',status:'success',time:'09:35:10'},
+      {name:'开处方',status:'success',time:'09:40:22'},
+      {name:'结算',status:'error',time:'09:41:05'},
+      {name:'发药',status:'pending',time:''},
+      {name:'库存扣减',status:'pending',time:''}
+    ]},
+  { name:'王五',idcard:'320282****9012',time:'2026-05-19 10:05',dept:'全科',id:'VIS20260519003',
+    nodes:[
+      {name:'患者扫码/刷卡',status:'success',time:'10:04:50'},
+      {name:'体征上传',status:'success',time:'10:05:12'},
+      {name:'挂号',status:'success',time:'10:05:38'},
+      {name:'视频问诊',status:'progress',time:'10:06:20'},
+      {name:'开处方',status:'pending',time:''},
+      {name:'结算',status:'pending',time:''},
+      {name:'发药',status:'pending',time:''},
+      {name:'库存扣减',status:'pending',time:''}
+    ]}
+];
+
+const LOG_DATA = {
+  0: { // 全部完成 case
+    0: {title:'患者扫码/刷卡', status:'success', sections:[
+      {title:'业务数据', type:'table', rows:[
+        ['识别方式','二维码扫码'],
+        ['设备编号','DEV-001（1号诊室自助机）'],
+        ['患者姓名','张三'],
+        ['身份证号','320282199001011234'],
+        ['医保类型','城镇职工基本医疗保险（UEBMI）'],
+        ['患者ID','P20260519001'],
+        ['识别结果','匹配成功']
+      ]},
+      {title:'接口调用详情', type:'table', rows:[
+        ['请求地址','POST https://his.hospital.com/api/patient/identify'],
+        ['请求头','Content-Type: application/json; Authorization: Bearer ***'],
+        ['请求内容','{"cardNo":"320282199001011234","identifyType":"qrcode","deviceId":"DEV-001"}'],
+        ['响应时间','2026-05-19 09:14:58'],
+        ['响应内容','{"code":200,"patientId":"P20260519001","name":"张三","insurType":"UEBMI"}'],
+        ['平台接收时间','2026-05-19 09:14:58'],
+        ['耗时','62ms']
+      ]}
+    ]},
+    1: {title:'体征上传', status:'success', sections:[
+      {title:'业务数据', type:'table', rows:[
+        ['收缩压/舒张压','120/80 mmHg'],
+        ['心率','72 次/分'],
+        ['体温','36.5 ℃'],
+        ['体重','65 kg'],
+        ['身高','170 cm'],
+        ['BMI','22.5（正常）'],
+        ['采集方式','设备自动读取'],
+        ['采集设备','欧姆龙 HBP-1300 + 红外体温枪']
+      ]},
+      {title:'接口调用详情', type:'table', rows:[
+        ['请求地址','POST https://his.hospital.com/api/vitals/upload'],
+        ['请求头','Content-Type: application/json; Authorization: Bearer ***'],
+        ['请求内容','{"patientId":"P20260519001","bp":"120/80","heartRate":72,"temp":36.5,"weight":65,"height":170}'],
+        ['响应时间','2026-05-19 09:15:20'],
+        ['响应内容','{"code":200,"vitalId":"VT001","msg":"体征数据上传成功"}'],
+        ['平台接收时间','2026-05-19 09:15:20'],
+        ['耗时','95ms']
+      ]}
+    ]},
+    2: {title:'挂号', status:'success', sections:[
+      {title:'业务数据', type:'table', rows:[
+        ['挂号号','GH20260519001'],
+        ['挂号科室','全科'],
+        ['接诊医生','刘医生（D012）'],
+        ['挂号类型','普通门诊'],
+        ['挂号费','¥10.00'],
+        ['支付方式','医保统筹'],
+        ['号源序号','第 3 号'],
+        ['预计等候','约 5 分钟']
+      ]},
+      {title:'接口调用详情', type:'table', rows:[
+        ['请求地址','POST https://his.hospital.com/api/register'],
+        ['请求头','Content-Type: application/json; Authorization: Bearer ***'],
+        ['请求内容','{"patientId":"P20260519001","deptCode":"QK","doctorId":"D012","regType":"normal"}'],
+        ['响应时间','2026-05-19 09:15:45'],
+        ['响应内容','{"code":200,"regNo":"GH20260519001","deptName":"全科","doctorName":"刘医生","fee":10.00}'],
+        ['平台接收时间','2026-05-19 09:15:45'],
+        ['耗时','128ms']
+      ]}
+    ]},
+    3: {title:'视频问诊', status:'success', sections:[
+      {title:'业务数据', type:'table', rows:[
+        ['会话ID','VS001'],
+        ['视频房间','ROOM-0519-03'],
+        ['问诊时长','3分42秒'],
+        ['连接质量','良好（延迟 38ms）'],
+        ['主诉','头痛3天，伴恶心'],
+        ['诊断','偏头痛（G43.9）'],
+        ['医生签名','刘医生 已确认'],
+        ['录像存档','已保存（REC-0519-001）']
+      ]},
+      {title:'接口调用详情', type:'table', rows:[
+        ['请求地址','POST https://his.hospital.com/api/consultation/video-start'],
+        ['请求头','Content-Type: application/json; Authorization: Bearer ***'],
+        ['请求内容','{"visitId":"VIS20260519001","doctorId":"D012","patientId":"P20260519001","roomId":"ROOM-0519-03"}'],
+        ['响应时间','2026-05-19 09:18:02'],
+        ['响应内容','{"code":200,"sessionId":"VS001","duration":"3min42s","diagnosis":"偏头痛(G43.9)","chiefComplaint":"头痛3天"}'],
+        ['平台接收时间','2026-05-19 09:18:02'],
+        ['耗时','222420ms（含问诊时长）']
+      ]}
+    ]},
+    4: {title:'开处方', status:'success', sections:[
+      {title:'业务数据', type:'table', rows:[
+        ['处方号','CF20260519001'],
+        ['处方类型','西药处方'],
+        ['药品名称','布洛芬缓释胶囊'],
+        ['规格','0.3g x 1盒'],
+        ['用法用量','口服，每日2次，每次1粒'],
+        ['诊断依据','偏头痛（G43.9）'],
+        ['合理性审核','系统自动审核通过'],
+        ['医生确认','刘医生 已签名']
+      ]},
+      {title:'接口调用详情', type:'table', rows:[
+        ['请求地址','POST https://his.hospital.com/api/prescription/create'],
+        ['请求头','Content-Type: application/json; Authorization: Bearer ***'],
+        ['请求内容','{"visitId":"VIS20260519001","drugs":[{"code":"D001","name":"布洛芬缓释胶囊","spec":"0.3g","qty":1,"usage":"口服 bid"}],"diagnosis":"G43.9"}'],
+        ['响应时间','2026-05-19 09:22:10'],
+        ['响应内容','{"code":200,"prescNo":"CF20260519001","auditResult":"pass","msg":"处方审核通过"}'],
+        ['平台接收时间','2026-05-19 09:22:10'],
+        ['耗时','203ms']
+      ]}
+    ]},
+    5: {title:'结算', status:'success', sections:[
+      {title:'业务数据', type:'table', rows:[
+        ['结算单号','JS20260519001'],
+        ['总金额','¥28.50'],
+        ['医保统筹支付','¥22.80'],
+        ['个人自付','¥5.70'],
+        ['医保类型','城镇职工基本医疗保险'],
+        ['结算状态','成功'],
+        ['支付流水号','PAY20260519001'],
+        ['发票号','FP20260519001']
+      ]},
+      {title:'接口调用详情', type:'table', rows:[
+        ['请求地址','POST https://his.hospital.com/api/settlement/pay'],
+        ['请求头','Content-Type: application/json; Authorization: Bearer ***; X-Insur-Type: UEBMI'],
+        ['请求内容','{"patientId":"P20260519001","prescId":"CF20260519001","totalAmount":28.50,"insurType":"UEBMI"}'],
+        ['响应时间','2026-05-19 09:23:52'],
+        ['响应内容','{"code":200,"settleNo":"JS20260519001","totalAmount":28.50,"insurPay":22.80,"selfPay":5.70}'],
+        ['平台接收时间','2026-05-19 09:23:52'],
+        ['耗时','156ms']
+      ]}
+    ]},
+    6: {title:'发药', status:'success', sections:[
+      {title:'业务数据', type:'table', rows:[
+        ['发药单号','DP001'],
+        ['药品名称','布洛芬缓释胶囊'],
+        ['药品批号','PH20260101'],
+        ['有效期','2027-12-31'],
+        ['发药窗口','3号窗口'],
+        ['发药药师','王药师'],
+        ['核对结果','药品/数量/规格 核对一致'],
+        ['患者取药','已确认签收']
+      ]},
+      {title:'接口调用详情', type:'table', rows:[
+        ['请求地址','POST https://his.hospital.com/api/pharmacy/dispense'],
+        ['请求头','Content-Type: application/json; Authorization: Bearer ***'],
+        ['请求内容','{"settleNo":"JS20260519001","prescNo":"CF20260519001","windowId":"W03"}'],
+        ['响应时间','2026-05-19 09:25:30'],
+        ['响应内容','{"code":200,"dispenseId":"DP001","drugName":"布洛芬缓释胶囊","batchNo":"PH20260101","pharmacist":"王药师"}'],
+        ['平台接收时间','2026-05-19 09:25:30'],
+        ['耗时','89ms']
+      ]}
+    ]},
+    7: {title:'库存扣减', status:'success', sections:[
+      {title:'业务数据', type:'table', rows:[
+        ['药品编码','D001'],
+        ['药品名称','布洛芬缓释胶囊'],
+        ['批号','PH20260101'],
+        ['扣减数量','1盒'],
+        ['扣减前库存','157'],
+        ['扣减后库存','156'],
+        ['仓库编号','WH-MAIN（主药房）'],
+        ['安全库存','50（当前充足）']
+      ]},
+      {title:'接口调用详情', type:'table', rows:[
+        ['请求地址','POST https://his.hospital.com/api/inventory/deduct'],
+        ['请求头','Content-Type: application/json; Authorization: Bearer ***'],
+        ['请求内容','{"drugCode":"D001","batchNo":"PH20260101","deductQty":1,"warehouseId":"WH-MAIN"}'],
+        ['响应时间','2026-05-19 09:25:31'],
+        ['响应内容','{"code":200,"remainStock":156,"drugName":"布洛芬缓释胶囊","msg":"库存扣减成功"}'],
+        ['平台接收时间','2026-05-19 09:25:31'],
+        ['耗时','45ms']
+      ]}
+    ]}
+  },
+  1: { // 异常中断 case
+    0: {title:'患者扫码/刷卡', status:'success', sections:[
+      {title:'业务数据', type:'table', rows:[
+        ['识别方式','刷卡（社保卡）'],
+        ['设备编号','DEV-002（2号诊室自助机）'],
+        ['患者姓名','李四'],
+        ['身份证号','320282199205055678'],
+        ['医保类型','城乡居民基本医疗保险（URBMI）'],
+        ['患者ID','P20260519002'],
+        ['识别结果','匹配成功']
+      ]},
+      {title:'接口调用详情', type:'table', rows:[
+        ['请求地址','POST https://his.hospital.com/api/patient/identify'],
+        ['请求头','Content-Type: application/json; Authorization: Bearer ***'],
+        ['请求内容','{"cardNo":"320282199205055678","identifyType":"card_swipe","deviceId":"DEV-002"}'],
+        ['响应时间','2026-05-19 09:31:50'],
+        ['响应内容','{"code":200,"patientId":"P20260519002","name":"李四","insurType":"URBMI"}'],
+        ['平台接收时间','2026-05-19 09:31:50'],
+        ['耗时','58ms']
+      ]}
+    ]},
+    1: {title:'体征上传', status:'success', sections:[
+      {title:'业务数据', type:'table', rows:[
+        ['收缩压/舒张压','135/90 mmHg（偏高）'],
+        ['心率','88 次/分'],
+        ['体温','37.2 ℃（低热）'],
+        ['体重','72 kg'],
+        ['身高','175 cm'],
+        ['BMI','23.5（正常）'],
+        ['采集方式','设备自动读取'],
+        ['采集设备','欧姆龙 HBP-1300 + 红外体温枪']
+      ]},
+      {title:'接口调用详情', type:'table', rows:[
+        ['请求地址','POST https://his.hospital.com/api/vitals/upload'],
+        ['请求头','Content-Type: application/json; Authorization: Bearer ***'],
+        ['请求内容','{"patientId":"P20260519002","bp":"135/90","heartRate":88,"temp":37.2,"weight":72,"height":175}'],
+        ['响应时间','2026-05-19 09:32:15'],
+        ['响应内容','{"code":200,"vitalId":"VT002","msg":"体征数据上传成功"}'],
+        ['平台接收时间','2026-05-19 09:32:15'],
+        ['耗时','102ms']
+      ]}
+    ]},
+    2: {title:'挂号', status:'success', sections:[
+      {title:'业务数据', type:'table', rows:[
+        ['挂号号','GH20260519002'],
+        ['挂号科室','内科'],
+        ['接诊医生','陈医生（D008）'],
+        ['挂号类型','普通门诊'],
+        ['挂号费','¥10.00'],
+        ['支付方式','医保统筹'],
+        ['号源序号','第 7 号'],
+        ['预计等候','约 12 分钟']
+      ]},
+      {title:'接口调用详情', type:'table', rows:[
+        ['请求地址','POST https://his.hospital.com/api/register'],
+        ['请求头','Content-Type: application/json; Authorization: Bearer ***'],
+        ['请求内容','{"patientId":"P20260519002","deptCode":"NK","doctorId":"D008","regType":"normal"}'],
+        ['响应时间','2026-05-19 09:32:40'],
+        ['响应内容','{"code":200,"regNo":"GH20260519002","deptName":"内科","doctorName":"陈医生","fee":10.00}'],
+        ['平台接收时间','2026-05-19 09:32:40'],
+        ['耗时','135ms']
+      ]}
+    ]},
+    3: {title:'视频问诊', status:'success', sections:[
+      {title:'业务数据', type:'table', rows:[
+        ['会话ID','VS002'],
+        ['视频房间','ROOM-0519-05'],
+        ['问诊时长','4分55秒'],
+        ['连接质量','良好（延迟 42ms）'],
+        ['主诉','头晕2天，伴耳鸣'],
+        ['诊断','高血压（I10）'],
+        ['医生签名','陈医生 已确认'],
+        ['录像存档','已保存（REC-0519-002）']
+      ]},
+      {title:'接口调用详情', type:'table', rows:[
+        ['请求地址','POST https://his.hospital.com/api/consultation/video-start'],
+        ['请求头','Content-Type: application/json; Authorization: Bearer ***'],
+        ['请求内容','{"visitId":"VIS20260519002","doctorId":"D008","patientId":"P20260519002","roomId":"ROOM-0519-05"}'],
+        ['响应时间','2026-05-19 09:35:10'],
+        ['响应内容','{"code":200,"sessionId":"VS002","duration":"4min55s","diagnosis":"高血压(I10)","chiefComplaint":"头晕2天"}'],
+        ['平台接收时间','2026-05-19 09:35:10'],
+        ['耗时','150320ms（含问诊时长）']
+      ]}
+    ]},
+    4: {title:'开处方', status:'success', sections:[
+      {title:'业务数据', type:'table', rows:[
+        ['处方号','CF20260519002'],
+        ['处方类型','西药处方'],
+        ['药品名称','氨氯地平片'],
+        ['规格','5mg x 1盒（28片）'],
+        ['用法用量','口服，每日1次，每次1片'],
+        ['诊断依据','高血压（I10）'],
+        ['合理性审核','系统自动审核通过'],
+        ['医生确认','陈医生 已签名']
+      ]},
+      {title:'接口调用详情', type:'table', rows:[
+        ['请求地址','POST https://his.hospital.com/api/prescription/create'],
+        ['请求头','Content-Type: application/json; Authorization: Bearer ***'],
+        ['请求内容','{"visitId":"VIS20260519002","drugs":[{"code":"D015","name":"氨氯地平片","spec":"5mg","qty":1,"usage":"口服 qd"}],"diagnosis":"I10"}'],
+        ['响应时间','2026-05-19 09:40:22'],
+        ['响应内容','{"code":200,"prescNo":"CF20260519002","auditResult":"pass","msg":"处方审核通过"}'],
+        ['平台接收时间','2026-05-19 09:40:22'],
+        ['耗时','188ms']
+      ]}
+    ]},
+    5: {title:'结算', status:'error', sections:[
+      {title:'业务数据', type:'table', rows:[
+        ['结算单号','—（未生成）'],
+        ['总金额','¥35.00'],
+        ['医保类型','城乡居民基本医疗保险'],
+        ['预计医保支付','¥28.00'],
+        ['预计个人自付','¥7.00'],
+        ['结算状态','失败（连接超时）'],
+        ['失败原因','HIS结算服务无响应'],
+        ['重试次数','2次（均超时）']
+      ]},
+      {title:'接口调用详情', type:'table', rows:[
+        ['请求地址','POST https://his.hospital.com/api/settlement/pay'],
+        ['请求头','Content-Type: application/json; Authorization: Bearer ***; X-Insur-Type: URBMI'],
+        ['请求内容','{"patientId":"P20260519002","prescId":"CF20260519002","totalAmount":35.00,"insurType":"URBMI"}'],
+        ['响应时间','—（无响应）'],
+        ['响应内容','—'],
+        ['平台接收时间','2026-05-19 09:41:05'],
+        ['耗时','超时 5000ms']
+      ]},
+      {title:'报错信息', type:'error', content:'ConnectTimeoutError: 连接HIS服务器 10.1.2.100:8080 超时\n等待 5000ms 无响应\n\n[09:41:08] 自动重试第1次... 超时\n[09:41:12] 自动重试第2次... 超时\n\n已达最大重试次数(2)，流程中断。\n后续环节（发药、库存扣减）被阻塞。\n\n网络诊断：\nping 10.1.2.100 → 超时\ntelnet 10.1.2.100:8080 → 连接被拒绝\n建议：联系HIS运维检查结算服务状态'}
+    ]},
+    6: {title:'发药', status:'pending', sections:[
+      {title:'等待信息', type:'pending', content:'该环节尚未执行。\n原因：前置环节「结算」异常中断，流程被阻塞。'}
+    ]},
+    7: {title:'库存扣减', status:'pending', sections:[
+      {title:'等待信息', type:'pending', content:'该环节尚未执行。\n原因：前置环节「结算」异常中断，流程被阻塞。'}
+    ]}
+  },
+  2: { // 进行中 case
+    0: {title:'患者扫码/刷卡', status:'success', sections:[
+      {title:'业务数据', type:'table', rows:[
+        ['识别方式','二维码扫码'],
+        ['设备编号','DEV-003（3号诊室自助机）'],
+        ['患者姓名','王五'],
+        ['身份证号','320282199308089012'],
+        ['医保类型','城镇职工基本医疗保险（UEBMI）'],
+        ['患者ID','P20260519003'],
+        ['识别结果','匹配成功']
+      ]},
+      {title:'接口调用详情', type:'table', rows:[
+        ['请求地址','POST https://his.hospital.com/api/patient/identify'],
+        ['请求头','Content-Type: application/json; Authorization: Bearer ***'],
+        ['请求内容','{"cardNo":"320282199308089012","identifyType":"qrcode","deviceId":"DEV-003"}'],
+        ['响应时间','2026-05-19 10:04:50'],
+        ['响应内容','{"code":200,"patientId":"P20260519003","name":"王五","insurType":"UEBMI"}'],
+        ['平台接收时间','2026-05-19 10:04:50'],
+        ['耗时','55ms']
+      ]}
+    ]},
+    1: {title:'体征上传', status:'success', sections:[
+      {title:'业务数据', type:'table', rows:[
+        ['收缩压/舒张压','118/75 mmHg'],
+        ['心率','68 次/分'],
+        ['体温','36.4 ℃'],
+        ['体重','58 kg'],
+        ['身高','162 cm'],
+        ['BMI','22.1（正常）'],
+        ['采集方式','设备自动读取'],
+        ['采集设备','欧姆龙 HBP-1300 + 红外体温枪']
+      ]},
+      {title:'接口调用详情', type:'table', rows:[
+        ['请求地址','POST https://his.hospital.com/api/vitals/upload'],
+        ['请求头','Content-Type: application/json; Authorization: Bearer ***'],
+        ['请求内容','{"patientId":"P20260519003","bp":"118/75","heartRate":68,"temp":36.4,"weight":58,"height":162}'],
+        ['响应时间','2026-05-19 10:05:12'],
+        ['响应内容','{"code":200,"vitalId":"VT003","msg":"体征数据上传成功"}'],
+        ['平台接收时间','2026-05-19 10:05:12'],
+        ['耗时','88ms']
+      ]}
+    ]},
+    2: {title:'挂号', status:'success', sections:[
+      {title:'业务数据', type:'table', rows:[
+        ['挂号号','GH20260519003'],
+        ['挂号科室','全科'],
+        ['接诊医生','刘医生（D012）'],
+        ['挂号类型','普通门诊'],
+        ['挂号费','¥10.00'],
+        ['支付方式','医保统筹'],
+        ['号源序号','第 11 号'],
+        ['预计等候','约 8 分钟']
+      ]},
+      {title:'接口调用详情', type:'table', rows:[
+        ['请求地址','POST https://his.hospital.com/api/register'],
+        ['请求头','Content-Type: application/json; Authorization: Bearer ***'],
+        ['请求内容','{"patientId":"P20260519003","deptCode":"QK","doctorId":"D012","regType":"normal"}'],
+        ['响应时间','2026-05-19 10:05:38'],
+        ['响应内容','{"code":200,"regNo":"GH20260519003","deptName":"全科","doctorName":"刘医生","fee":10.00}'],
+        ['平台接收时间','2026-05-19 10:05:38'],
+        ['耗时','142ms']
+      ]}
+    ]},
+    3: {title:'视频问诊', status:'progress', sections:[
+      {title:'业务数据', type:'table', rows:[
+        ['会话ID','VS003'],
+        ['视频房间','ROOM-0519-07'],
+        ['问诊时长','进行中（已持续 3分12秒）'],
+        ['连接质量','良好（延迟 35ms）'],
+        ['主诉','咳嗽1周，伴咽痛'],
+        ['诊断','待出（问诊进行中）'],
+        ['医生签名','—'],
+        ['录像存档','录制中']
+      ]},
+      {title:'接口调用详情', type:'table', rows:[
+        ['请求地址','POST https://his.hospital.com/api/consultation/video-start'],
+        ['请求头','Content-Type: application/json; Authorization: Bearer ***'],
+        ['请求内容','{"visitId":"VIS20260519003","doctorId":"D012","patientId":"P20260519003","roomId":"ROOM-0519-07"}'],
+        ['响应时间','2026-05-19 10:06:20'],
+        ['响应内容','{"code":200,"sessionId":"VS003","status":"in_progress","msg":"视频通话已建立"}'],
+        ['平台接收时间','2026-05-19 10:06:20'],
+        ['耗时','进行中...（医生正在问诊）']
+      ]}
+    ]},
+    4: {title:'开处方', status:'pending', sections:[
+      {title:'等待信息', type:'pending', content:'该环节尚未执行。\n原因：前置环节「视频问诊」进行中，等待医生完成问诊后开具处方。'}
+    ]},
+    5: {title:'结算', status:'pending', sections:[
+      {title:'等待信息', type:'pending', content:'该环节尚未执行。\n等待前置环节完成。'}
+    ]},
+    6: {title:'发药', status:'pending', sections:[
+      {title:'等待信息', type:'pending', content:'该环节尚未执行。\n等待前置环节完成。'}
+    ]},
+    7: {title:'库存扣减', status:'pending', sections:[
+      {title:'等待信息', type:'pending', content:'该环节尚未执行。\n等待前置环节完成。'}
+    ]}
+  }
+};
+
+let currentCase = 0;
+
+function showDetail(caseIdx) {
+  currentCase = caseIdx;
+  const c = CASES[caseIdx];
+  document.getElementById('d-name').textContent = c.name;
+  document.getElementById('d-idcard').textContent = c.idcard;
+  document.getElementById('d-time').textContent = c.time;
+  document.getElementById('d-dept').textContent = c.dept;
+  document.getElementById('d-id').textContent = c.id;
+  renderFlowNodes(c.nodes);
+  selectNode(0);
+  document.getElementById('page-list').classList.remove('active');
+  document.getElementById('page-detail').classList.add('active');
+}
+
+function showList() {
+  document.getElementById('page-detail').classList.remove('active');
+  document.getElementById('page-list').classList.add('active');
+}
+
+function renderFlowNodes(nodes) {
+  const list = document.getElementById('flow-list');
+  list.innerHTML = nodes.map((n, i) => {
+    const timeText = n.status === 'success' ? n.time + ' 已完成' :
+                     n.status === 'error' ? n.time + ' 异常' :
+                     n.status === 'progress' ? n.time + ' 进行中' : '未开始';
+    return `<div class="flow-node ${n.status}" onclick="selectNode(${i})">
+      <div class="flow-node-name">${i+1}. ${n.name}</div>
+      <div class="flow-node-time">${timeText}</div>
+    </div>`;
+  }).join('');
+}
+
+function selectNode(index) {
+  document.querySelectorAll('.flow-node').forEach((n, i) => n.classList.toggle('active', i === index));
+  const logData = LOG_DATA[currentCase][index];
+  let html = `<div class="log-panel-header">
+    <span class="log-panel-title">${logData.title}</span>
+    <span class="log-panel-status ${logData.status}">${logData.status==='success'?'已完成':logData.status==='error'?'异常':logData.status==='progress'?'进行中':'未开始'}</span>
+  </div><div class="log-panel-body">`;
+  logData.sections.forEach(s => {
+    html += `<div class="log-section"><div class="log-section-title">${s.title}</div>`;
+    if (s.type === 'table') {
+      html += '<table class="log-table">';
+      s.rows.forEach(r => { html += `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`; });
+      html += '</table>';
+    } else if (s.type === 'error') {
+      html += `<div class="log-block error-block">${s.content}</div>`;
+    } else if (s.type === 'pending') {
+      html += `<div class="log-block" style="color:#999;">${s.content}</div>`;
+    } else if (s.type === 'info') {
+      html += `<div class="log-block" style="background:#f0f7ff;color:#1565c0;border-left:3px solid #4361EE;">${s.content}</div>`;
+    }
+    html += '</div>';
+  });
+  html += '</div>';
+  document.getElementById('log-content').innerHTML = html;
+}
+</script>
+</body>
+</html>
