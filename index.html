@@ -301,8 +301,7 @@ const CASES = [
       {name:'视频问诊',status:'success',time:'09:18:02'},
       {name:'开处方',status:'success',time:'09:22:10'},
       {name:'结算',status:'success',time:'09:23:52'},
-      {name:'发药',status:'success',time:'09:25:30'},
-      {name:'库存扣减',status:'success',time:'09:25:31'}
+      {name:'发药/库存扣减',status:'success',time:'09:25:30'}
     ]},
   { name:'李四',idcard:'320282199205055678',time:'2026-05-19 09:32',dept:'卫生室',id:'VIS20260519002',
     nodes:[
@@ -312,8 +311,7 @@ const CASES = [
       {name:'视频问诊',status:'success',time:'09:35:10'},
       {name:'开处方',status:'success',time:'09:40:22'},
       {name:'结算',status:'error',time:'09:41:05'},
-      {name:'发药',status:'pending',time:''},
-      {name:'库存扣减',status:'pending',time:''}
+      {name:'发药/库存扣减',status:'pending',time:''}
     ]},
   { name:'王五',idcard:'320282199308089012',time:'2026-05-19 10:05',dept:'卫生室',id:'VIS20260519003',
     nodes:[
@@ -323,8 +321,7 @@ const CASES = [
       {name:'视频问诊',status:'progress',time:'10:06:20'},
       {name:'开处方',status:'pending',time:''},
       {name:'结算',status:'pending',time:''},
-      {name:'发药',status:'pending',time:''},
-      {name:'库存扣减',status:'pending',time:''}
+      {name:'发药/库存扣减',status:'pending',time:''}
     ]}
 ];
 
@@ -455,7 +452,7 @@ const LOG_DATA = {
         ['耗时','156ms']
       ]}
     ]},
-    6: {title:'发药', status:'success', sections:[
+    6: {title:'发药/库存扣减', status:'success', sections:[
       {title:'业务数据', type:'table', rows:[
         ['发药单号','DP001'],
         ['药品名称','布洛芬缓释胶囊'],
@@ -464,9 +461,12 @@ const LOG_DATA = {
         ['发药窗口','3号窗口'],
         ['发药药师','王药师'],
         ['核对结果','药品/数量/规格 核对一致'],
-        ['患者取药','已确认签收']
+        ['患者取药','已确认签收'],
+        ['库存扣减','扣减1盒（157→156）'],
+        ['仓库编号','WH-MAIN（主药房）'],
+        ['安全库存','50（当前充足）']
       ]},
-      {title:'接口调用详情', type:'table', rows:[
+      {title:'接口调用详情 - 发药', type:'table', rows:[
         ['请求地址','POST https://his.hospital.com/api/pharmacy/dispense'],
         ['请求头','Content-Type: application/json; Authorization: Bearer ***'],
         ['请求内容','{"settleNo":"JS20260519001","prescNo":"CF20260519001","windowId":"W03"}'],
@@ -474,20 +474,8 @@ const LOG_DATA = {
         ['响应内容','{"code":200,"dispenseId":"DP001","drugName":"布洛芬缓释胶囊","batchNo":"PH20260101","pharmacist":"王药师"}'],
         ['平台接收时间','2026-05-19 09:25:30'],
         ['耗时','89ms']
-      ]}
-    ]},
-    7: {title:'库存扣减', status:'success', sections:[
-      {title:'业务数据', type:'table', rows:[
-        ['药品编码','D001'],
-        ['药品名称','布洛芬缓释胶囊'],
-        ['批号','PH20260101'],
-        ['扣减数量','1盒'],
-        ['扣减前库存','157'],
-        ['扣减后库存','156'],
-        ['仓库编号','WH-MAIN（主药房）'],
-        ['安全库存','50（当前充足）']
       ]},
-      {title:'接口调用详情', type:'table', rows:[
+      {title:'接口调用详情 - 库存扣减', type:'table', rows:[
         ['请求地址','POST https://his.hospital.com/api/inventory/deduct'],
         ['请求头','Content-Type: application/json; Authorization: Bearer ***'],
         ['请求内容','{"drugCode":"D001","batchNo":"PH20260101","deductQty":1,"warehouseId":"WH-MAIN"}'],
@@ -625,10 +613,7 @@ const LOG_DATA = {
       ]},
       {title:'报错信息', type:'error', content:'ConnectTimeoutError: 连接HIS服务器 10.1.2.100:8080 超时\n等待 5000ms 无响应\n\n[09:41:08] 自动重试第1次... 超时\n[09:41:12] 自动重试第2次... 超时\n\n已达最大重试次数(2)，流程中断。\n后续环节（发药、库存扣减）被阻塞。\n\n网络诊断：\nping 10.1.2.100 → 超时\ntelnet 10.1.2.100:8080 → 连接被拒绝\n建议：联系HIS运维检查结算服务状态'}
     ]},
-    6: {title:'发药', status:'pending', sections:[
-      {title:'等待信息', type:'pending', content:'该环节尚未执行。\n原因：前置环节「结算」异常中断，流程被阻塞。'}
-    ]},
-    7: {title:'库存扣减', status:'pending', sections:[
+    6: {title:'发药/库存扣减', status:'pending', sections:[
       {title:'等待信息', type:'pending', content:'该环节尚未执行。\n原因：前置环节「结算」异常中断，流程被阻塞。'}
     ]}
   },
@@ -722,10 +707,7 @@ const LOG_DATA = {
     5: {title:'结算', status:'pending', sections:[
       {title:'等待信息', type:'pending', content:'该环节尚未执行。\n等待前置环节完成。'}
     ]},
-    6: {title:'发药', status:'pending', sections:[
-      {title:'等待信息', type:'pending', content:'该环节尚未执行。\n等待前置环节完成。'}
-    ]},
-    7: {title:'库存扣减', status:'pending', sections:[
+    6: {title:'发药/库存扣减', status:'pending', sections:[
       {title:'等待信息', type:'pending', content:'该环节尚未执行。\n等待前置环节完成。'}
     ]}
   }
