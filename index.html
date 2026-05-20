@@ -337,12 +337,12 @@ const LOG_DATA = {
         ['患者ID','P20260519001'],
         ['识别结果','匹配成功']
       ]},
-      {title:'接口调用详情', type:'table', rows:[
-        ['请求地址','POST https://his.hospital.com/api/patient/identify'],
+      {title:'接口调用详情 - BR_DA_DangAnCX 病人档案信息查询', type:'table', rows:[
+        ['请求地址','POST https://his.hospital.com/api/BR_DA_DangAnCX'],
         ['请求头','Content-Type: application/json; Authorization: Bearer ***'],
         ['请求内容','{"cardNo":"320282199001011234","identifyType":"qrcode","deviceId":"DEV-001"}'],
         ['响应时间','2026-05-19 09:14:58'],
-        ['响应内容','{"code":200,"patientId":"P20260519001","name":"张三","insurType":"UEBMI"}'],
+        ['响应内容','{"code":200,"patientId":"P20260519001","name":"张三","insurType":"UEBMI","gender":"男","age":36}'],
         ['平台接收时间','2026-05-19 09:14:58'],
         ['耗时','62ms']
       ]}
@@ -358,9 +358,9 @@ const LOG_DATA = {
         ['采集方式','设备自动读取'],
         ['采集设备','欧姆龙 HBP-1300 + 红外体温枪']
       ]},
-      {title:'接口调用详情', type:'table', rows:[
-        ['请求地址','POST https://his.hospital.com/api/vitals/upload'],
-        ['请求头','Content-Type: application/json; Authorization: Bearer ***'],
+      {title:'接口调用详情 - 内部接口 体征数据上传', type:'table', rows:[
+        ['请求地址','POST https://platform.internal/api/vitals/upload'],
+        ['请求头','Content-Type: application/json; X-Device-Id: DEV-001'],
         ['请求内容','{"patientId":"P20260519001","bp":"120/80","heartRate":72,"temp":36.5,"weight":65,"height":170}'],
         ['响应时间','2026-05-19 09:15:20'],
         ['响应内容','{"code":200,"vitalId":"VT001","msg":"体征数据上传成功"}'],
@@ -379,10 +379,28 @@ const LOG_DATA = {
         ['号源序号','第 3 号'],
         ['预计等候','约 5 分钟']
       ]},
-      {title:'接口调用详情', type:'table', rows:[
-        ['请求地址','POST https://his.hospital.com/api/register'],
+      {title:'接口调用详情 - JZ_GH_PaiBanXXCX 排班信息查询', type:'table', rows:[
+        ['请求地址','POST https://his.hospital.com/api/JZ_GH_PaiBanXXCX'],
         ['请求头','Content-Type: application/json; Authorization: Bearer ***'],
-        ['请求内容','{"patientId":"P20260519001","deptCode":"WSS","doctorId":"D012","regType":"normal"}'],
+        ['请求内容','{"deptCode":"WSS","scheduleDate":"2026-05-19"}'],
+        ['响应时间','2026-05-19 09:15:32'],
+        ['响应内容','{"code":200,"schedules":[{"doctorId":"D012","doctorName":"刘医生","totalSlots":20,"usedSlots":2}]}'],
+        ['平台接收时间','2026-05-19 09:15:32'],
+        ['耗时','85ms']
+      ]},
+      {title:'接口调用详情 - JZ_GH_PaiBanHYXXCX 排班号源信息查询', type:'table', rows:[
+        ['请求地址','POST https://his.hospital.com/api/JZ_GH_PaiBanHYXXCX'],
+        ['请求头','Content-Type: application/json; Authorization: Bearer ***'],
+        ['请求内容','{"doctorId":"D012","scheduleDate":"2026-05-19"}'],
+        ['响应时间','2026-05-19 09:15:35'],
+        ['响应内容','{"code":200,"availableSlot":3,"timeRange":"09:00-09:30"}'],
+        ['平台接收时间','2026-05-19 09:15:35'],
+        ['耗时','62ms']
+      ]},
+      {title:'接口调用详情 - JZ_GH_YuYueFQ 挂号预约发起', type:'table', rows:[
+        ['请求地址','POST https://his.hospital.com/api/JZ_GH_YuYueFQ'],
+        ['请求头','Content-Type: application/json; Authorization: Bearer ***'],
+        ['请求内容','{"patientId":"P20260519001","doctorId":"D012","deptCode":"WSS","slotNo":3}'],
         ['响应时间','2026-05-19 09:15:45'],
         ['响应内容','{"code":200,"regNo":"GH20260519001","deptName":"卫生室","doctorName":"刘医生","fee":10.00}'],
         ['平台接收时间','2026-05-19 09:15:45'],
@@ -400,12 +418,12 @@ const LOG_DATA = {
         ['医生签名','刘医生 已确认'],
         ['录像存档','已保存（REC-0519-001）']
       ]},
-      {title:'接口调用详情', type:'table', rows:[
-        ['请求地址','POST https://his.hospital.com/api/consultation/video-start'],
-        ['请求头','Content-Type: application/json; Authorization: Bearer ***'],
+      {title:'接口调用详情 - 内部接口 视频问诊会话', type:'table', rows:[
+        ['请求地址','POST https://platform.internal/api/consultation/video-start'],
+        ['请求头','Content-Type: application/json; X-Session-Token: ***'],
         ['请求内容','{"visitId":"VIS20260519001","doctorId":"D012","patientId":"P20260519001","roomId":"ROOM-0519-03"}'],
         ['响应时间','2026-05-19 09:18:02'],
-        ['响应内容','{"code":200,"sessionId":"VS001","duration":"3min42s","diagnosis":"偏头痛(G43.9)","chiefComplaint":"头痛3天"}'],
+        ['响应内容','{"code":200,"sessionId":"VS001","duration":"3min42s","diagnosis":"偏头痛(G43.9)","chiefComplaint":"头痛3天","startTime":"09:14:20","endTime":"09:18:02"}'],
         ['平台接收时间','2026-05-19 09:18:02'],
         ['耗时','222420ms（含问诊时长）']
       ]}
@@ -421,10 +439,10 @@ const LOG_DATA = {
         ['合理性审核','系统自动审核通过'],
         ['医生确认','刘医生 已签名']
       ]},
-      {title:'接口调用详情', type:'table', rows:[
-        ['请求地址','POST https://his.hospital.com/api/prescription/create'],
+      {title:'接口调用详情 - YZ_MZ_YiZhuSQ 门诊医嘱申请', type:'table', rows:[
+        ['请求地址','POST https://his.hospital.com/api/YZ_MZ_YiZhuSQ'],
         ['请求头','Content-Type: application/json; Authorization: Bearer ***'],
-        ['请求内容','{"visitId":"VIS20260519001","drugs":[{"code":"D001","name":"布洛芬缓释胶囊","spec":"0.3g","qty":1,"usage":"口服 bid"}],"diagnosis":"G43.9"}'],
+        ['请求内容','{"visitId":"VIS20260519001","drugs":[{"code":"D001","name":"布洛芬缓释胶囊","spec":"0.3g","qty":1,"usage":"口服 bid"}],"diagnosis":"G43.9","doctorId":"D012"}'],
         ['响应时间','2026-05-19 09:22:10'],
         ['响应内容','{"code":200,"prescNo":"CF20260519001","auditResult":"pass","msg":"处方审核通过"}'],
         ['平台接收时间','2026-05-19 09:22:10'],
@@ -442,14 +460,50 @@ const LOG_DATA = {
         ['支付流水号','PAY20260519001'],
         ['发票号','FP20260519001']
       ]},
-      {title:'接口调用详情', type:'table', rows:[
-        ['请求地址','POST https://his.hospital.com/api/settlement/pay'],
+      {title:'接口调用详情 - FY_MZ_ChaXun 门诊费用信息查询', type:'table', rows:[
+        ['请求地址','POST https://his.hospital.com/api/FY_MZ_ChaXun'],
+        ['请求头','Content-Type: application/json; Authorization: Bearer ***'],
+        ['请求内容','{"patientId":"P20260519001","visitId":"VIS20260519001"}'],
+        ['响应时间','2026-05-19 09:23:30'],
+        ['响应内容','{"code":200,"totalFee":28.50,"items":[{"name":"布洛芬缓释胶囊","fee":18.50},{"name":"挂号费","fee":10.00}]}'],
+        ['平台接收时间','2026-05-19 09:23:30'],
+        ['耗时','78ms']
+      ]},
+      {title:'接口调用详情 - FY_MZ_DaiJieSFYCX 门诊待结算费用查询', type:'table', rows:[
+        ['请求地址','POST https://his.hospital.com/api/FY_MZ_DaiJieSFYCX'],
+        ['请求头','Content-Type: application/json; Authorization: Bearer ***'],
+        ['请求内容','{"patientId":"P20260519001","prescNo":"CF20260519001"}'],
+        ['响应时间','2026-05-19 09:23:35'],
+        ['响应内容','{"code":200,"pendingAmount":28.50,"insurEligible":true,"items":["CF20260519001"]}'],
+        ['平台接收时间','2026-05-19 09:23:35'],
+        ['耗时','65ms']
+      ]},
+      {title:'接口调用详情 - FY_MZ_ShouFeiYJSFQ 门诊预结算服务发起', type:'table', rows:[
+        ['请求地址','POST https://his.hospital.com/api/FY_MZ_ShouFeiYJSFQ'],
         ['请求头','Content-Type: application/json; Authorization: Bearer ***; X-Insur-Type: UEBMI'],
-        ['请求内容','{"patientId":"P20260519001","prescId":"CF20260519001","totalAmount":28.50,"insurType":"UEBMI"}'],
-        ['响应时间','2026-05-19 09:23:52'],
-        ['响应内容','{"code":200,"settleNo":"JS20260519001","totalAmount":28.50,"insurPay":22.80,"selfPay":5.70}'],
-        ['平台接收时间','2026-05-19 09:23:52'],
+        ['请求内容','{"patientId":"P20260519001","prescNo":"CF20260519001","insurType":"UEBMI"}'],
+        ['响应时间','2026-05-19 09:23:40'],
+        ['响应内容','{"code":200,"preSettleNo":"PRE001","insurPay":22.80,"selfPay":5.70,"totalAmount":28.50}'],
+        ['平台接收时间','2026-05-19 09:23:40'],
+        ['耗时','112ms']
+      ]},
+      {title:'接口调用详情 - FY_MZ_ShouFeiJSFQ 门诊结算服务发起', type:'table', rows:[
+        ['请求地址','POST https://his.hospital.com/api/FY_MZ_ShouFeiJSFQ'],
+        ['请求头','Content-Type: application/json; Authorization: Bearer ***; X-Insur-Type: UEBMI'],
+        ['请求内容','{"patientId":"P20260519001","preSettleNo":"PRE001","confirmPay":true}'],
+        ['响应时间','2026-05-19 09:23:48'],
+        ['响应内容','{"code":200,"settleNo":"JS20260519001","payNo":"PAY20260519001","invoiceNo":"FP20260519001"}'],
+        ['平台接收时间','2026-05-19 09:23:48'],
         ['耗时','156ms']
+      ]},
+      {title:'接口调用详情 - FY_MZ_JieSuanCX 门诊结算查询', type:'table', rows:[
+        ['请求地址','POST https://his.hospital.com/api/FY_MZ_JieSuanCX'],
+        ['请求头','Content-Type: application/json; Authorization: Bearer ***'],
+        ['请求内容','{"settleNo":"JS20260519001"}'],
+        ['响应时间','2026-05-19 09:23:52'],
+        ['响应内容','{"code":200,"settleNo":"JS20260519001","status":"success","totalAmount":28.50,"insurPay":22.80,"selfPay":5.70}'],
+        ['平台接收时间','2026-05-19 09:23:52'],
+        ['耗时','52ms']
       ]}
     ]},
     6: {title:'发药/库存扣减', status:'success', sections:[
@@ -466,23 +520,23 @@ const LOG_DATA = {
         ['仓库编号','WH-MAIN（主药房）'],
         ['安全库存','50（当前充足）']
       ]},
-      {title:'接口调用详情 - 发药', type:'table', rows:[
-        ['请求地址','POST https://his.hospital.com/api/pharmacy/dispense'],
-        ['请求头','Content-Type: application/json; Authorization: Bearer ***'],
-        ['请求内容','{"settleNo":"JS20260519001","prescNo":"CF20260519001","windowId":"W03"}'],
-        ['响应时间','2026-05-19 09:25:30'],
-        ['响应内容','{"code":200,"dispenseId":"DP001","drugName":"布洛芬缓释胶囊","batchNo":"PH20260101","pharmacist":"王药师"}'],
-        ['平台接收时间','2026-05-19 09:25:30'],
-        ['耗时','89ms']
-      ]},
-      {title:'接口调用详情 - 库存扣减', type:'table', rows:[
+      {title:'接口调用详情 - HIS接口 药品库存扣减', type:'table', rows:[
         ['请求地址','POST https://his.hospital.com/api/inventory/deduct'],
         ['请求头','Content-Type: application/json; Authorization: Bearer ***'],
-        ['请求内容','{"drugCode":"D001","batchNo":"PH20260101","deductQty":1,"warehouseId":"WH-MAIN"}'],
-        ['响应时间','2026-05-19 09:25:31'],
+        ['请求内容','{"drugCode":"D001","batchNo":"PH20260101","deductQty":1,"warehouseId":"WH-MAIN","prescNo":"CF20260519001"}'],
+        ['响应时间','2026-05-19 09:25:30'],
         ['响应内容','{"code":200,"remainStock":156,"drugName":"布洛芬缓释胶囊","msg":"库存扣减成功"}'],
-        ['平台接收时间','2026-05-19 09:25:31'],
+        ['平台接收时间','2026-05-19 09:25:30'],
         ['耗时','45ms']
+      ]},
+      {title:'接口调用详情 - 内部接口 药柜发药轮询', type:'table', rows:[
+        ['请求地址','POST https://platform.internal/api/cabinet/dispense-poll'],
+        ['请求头','Content-Type: application/json; X-Cabinet-Id: CAB-001'],
+        ['请求内容','{"prescNo":"CF20260519001","drugCode":"D001","cabinetId":"CAB-001"}'],
+        ['响应时间','2026-05-19 09:25:31'],
+        ['响应内容','{"code":200,"status":"dispensed","slotNo":"A3","dispensedAt":"09:25:31","confirmed":true}'],
+        ['平台接收时间','2026-05-19 09:25:31'],
+        ['耗时','89ms']
       ]}
     ]}
   },
@@ -497,12 +551,12 @@ const LOG_DATA = {
         ['患者ID','P20260519002'],
         ['识别结果','匹配成功']
       ]},
-      {title:'接口调用详情', type:'table', rows:[
-        ['请求地址','POST https://his.hospital.com/api/patient/identify'],
+      {title:'接口调用详情 - BR_DA_DangAnCX 病人档案信息查询', type:'table', rows:[
+        ['请求地址','POST https://his.hospital.com/api/BR_DA_DangAnCX'],
         ['请求头','Content-Type: application/json; Authorization: Bearer ***'],
         ['请求内容','{"cardNo":"320282199205055678","identifyType":"card_swipe","deviceId":"DEV-002"}'],
         ['响应时间','2026-05-19 09:31:50'],
-        ['响应内容','{"code":200,"patientId":"P20260519002","name":"李四","insurType":"URBMI"}'],
+        ['响应内容','{"code":200,"patientId":"P20260519002","name":"李四","insurType":"URBMI","gender":"男","age":34}'],
         ['平台接收时间','2026-05-19 09:31:50'],
         ['耗时','58ms']
       ]}
@@ -518,9 +572,9 @@ const LOG_DATA = {
         ['采集方式','设备自动读取'],
         ['采集设备','欧姆龙 HBP-1300 + 红外体温枪']
       ]},
-      {title:'接口调用详情', type:'table', rows:[
-        ['请求地址','POST https://his.hospital.com/api/vitals/upload'],
-        ['请求头','Content-Type: application/json; Authorization: Bearer ***'],
+      {title:'接口调用详情 - 内部接口 体征数据上传', type:'table', rows:[
+        ['请求地址','POST https://platform.internal/api/vitals/upload'],
+        ['请求头','Content-Type: application/json; X-Device-Id: DEV-002'],
         ['请求内容','{"patientId":"P20260519002","bp":"135/90","heartRate":88,"temp":37.2,"weight":72,"height":175}'],
         ['响应时间','2026-05-19 09:32:15'],
         ['响应内容','{"code":200,"vitalId":"VT002","msg":"体征数据上传成功"}'],
@@ -539,10 +593,28 @@ const LOG_DATA = {
         ['号源序号','第 7 号'],
         ['预计等候','约 12 分钟']
       ]},
-      {title:'接口调用详情', type:'table', rows:[
-        ['请求地址','POST https://his.hospital.com/api/register'],
+      {title:'接口调用详情 - JZ_GH_PaiBanXXCX 排班信息查询', type:'table', rows:[
+        ['请求地址','POST https://his.hospital.com/api/JZ_GH_PaiBanXXCX'],
         ['请求头','Content-Type: application/json; Authorization: Bearer ***'],
-        ['请求内容','{"patientId":"P20260519002","deptCode":"WSS","doctorId":"D008","regType":"normal"}'],
+        ['请求内容','{"deptCode":"WSS","scheduleDate":"2026-05-19"}'],
+        ['响应时间','2026-05-19 09:32:28'],
+        ['响应内容','{"code":200,"schedules":[{"doctorId":"D008","doctorName":"陈医生","totalSlots":15,"usedSlots":6}]}'],
+        ['平台接收时间','2026-05-19 09:32:28'],
+        ['耗时','72ms']
+      ]},
+      {title:'接口调用详情 - JZ_GH_PaiBanHYXXCX 排班号源信息查询', type:'table', rows:[
+        ['请求地址','POST https://his.hospital.com/api/JZ_GH_PaiBanHYXXCX'],
+        ['请求头','Content-Type: application/json; Authorization: Bearer ***'],
+        ['请求内容','{"doctorId":"D008","scheduleDate":"2026-05-19"}'],
+        ['响应时间','2026-05-19 09:32:32'],
+        ['响应内容','{"code":200,"availableSlot":7,"timeRange":"09:30-10:00"}'],
+        ['平台接收时间','2026-05-19 09:32:32'],
+        ['耗时','58ms']
+      ]},
+      {title:'接口调用详情 - JZ_GH_YuYueFQ 挂号预约发起', type:'table', rows:[
+        ['请求地址','POST https://his.hospital.com/api/JZ_GH_YuYueFQ'],
+        ['请求头','Content-Type: application/json; Authorization: Bearer ***'],
+        ['请求内容','{"patientId":"P20260519002","doctorId":"D008","deptCode":"WSS","slotNo":7}'],
         ['响应时间','2026-05-19 09:32:40'],
         ['响应内容','{"code":200,"regNo":"GH20260519002","deptName":"卫生室","doctorName":"陈医生","fee":10.00}'],
         ['平台接收时间','2026-05-19 09:32:40'],
@@ -560,12 +632,12 @@ const LOG_DATA = {
         ['医生签名','陈医生 已确认'],
         ['录像存档','已保存（REC-0519-002）']
       ]},
-      {title:'接口调用详情', type:'table', rows:[
-        ['请求地址','POST https://his.hospital.com/api/consultation/video-start'],
-        ['请求头','Content-Type: application/json; Authorization: Bearer ***'],
+      {title:'接口调用详情 - 内部接口 视频问诊会话', type:'table', rows:[
+        ['请求地址','POST https://platform.internal/api/consultation/video-start'],
+        ['请求头','Content-Type: application/json; X-Session-Token: ***'],
         ['请求内容','{"visitId":"VIS20260519002","doctorId":"D008","patientId":"P20260519002","roomId":"ROOM-0519-05"}'],
         ['响应时间','2026-05-19 09:35:10'],
-        ['响应内容','{"code":200,"sessionId":"VS002","duration":"4min55s","diagnosis":"高血压(I10)","chiefComplaint":"头晕2天"}'],
+        ['响应内容','{"code":200,"sessionId":"VS002","duration":"4min55s","diagnosis":"高血压(I10)","chiefComplaint":"头晕2天","startTime":"09:30:15","endTime":"09:35:10"}'],
         ['平台接收时间','2026-05-19 09:35:10'],
         ['耗时','150320ms（含问诊时长）']
       ]}
@@ -581,10 +653,10 @@ const LOG_DATA = {
         ['合理性审核','系统自动审核通过'],
         ['医生确认','陈医生 已签名']
       ]},
-      {title:'接口调用详情', type:'table', rows:[
-        ['请求地址','POST https://his.hospital.com/api/prescription/create'],
+      {title:'接口调用详情 - YZ_MZ_YiZhuSQ 门诊医嘱申请', type:'table', rows:[
+        ['请求地址','POST https://his.hospital.com/api/YZ_MZ_YiZhuSQ'],
         ['请求头','Content-Type: application/json; Authorization: Bearer ***'],
-        ['请求内容','{"visitId":"VIS20260519002","drugs":[{"code":"D015","name":"氨氯地平片","spec":"5mg","qty":1,"usage":"口服 qd"}],"diagnosis":"I10"}'],
+        ['请求内容','{"visitId":"VIS20260519002","drugs":[{"code":"D015","name":"氨氯地平片","spec":"5mg","qty":1,"usage":"口服 qd"}],"diagnosis":"I10","doctorId":"D008"}'],
         ['响应时间','2026-05-19 09:40:22'],
         ['响应内容','{"code":200,"prescNo":"CF20260519002","auditResult":"pass","msg":"处方审核通过"}'],
         ['平台接收时间','2026-05-19 09:40:22'],
@@ -602,16 +674,34 @@ const LOG_DATA = {
         ['失败原因','HIS结算服务无响应'],
         ['重试次数','2次（均超时）']
       ]},
-      {title:'接口调用详情', type:'table', rows:[
-        ['请求地址','POST https://his.hospital.com/api/settlement/pay'],
+      {title:'接口调用详情 - FY_MZ_ChaXun 门诊费用信息查询', type:'table', rows:[
+        ['请求地址','POST https://his.hospital.com/api/FY_MZ_ChaXun'],
+        ['请求头','Content-Type: application/json; Authorization: Bearer ***'],
+        ['请求内容','{"patientId":"P20260519002","visitId":"VIS20260519002"}'],
+        ['响应时间','2026-05-19 09:40:45'],
+        ['响应内容','{"code":200,"totalFee":35.00,"items":[{"name":"氨氯地平片","fee":25.00},{"name":"挂号费","fee":10.00}]}'],
+        ['平台接收时间','2026-05-19 09:40:45'],
+        ['耗时','82ms']
+      ]},
+      {title:'接口调用详情 - FY_MZ_DaiJieSFYCX 门诊待结算费用查询', type:'table', rows:[
+        ['请求地址','POST https://his.hospital.com/api/FY_MZ_DaiJieSFYCX'],
+        ['请求头','Content-Type: application/json; Authorization: Bearer ***'],
+        ['请求内容','{"patientId":"P20260519002","prescNo":"CF20260519002"}'],
+        ['响应时间','2026-05-19 09:40:50'],
+        ['响应内容','{"code":200,"pendingAmount":35.00,"insurEligible":true,"items":["CF20260519002"]}'],
+        ['平台接收时间','2026-05-19 09:40:50'],
+        ['耗时','68ms']
+      ]},
+      {title:'接口调用详情 - FY_MZ_ShouFeiYJSFQ 门诊预结算服务发起', type:'table', rows:[
+        ['请求地址','POST https://his.hospital.com/api/FY_MZ_ShouFeiYJSFQ'],
         ['请求头','Content-Type: application/json; Authorization: Bearer ***; X-Insur-Type: URBMI'],
-        ['请求内容','{"patientId":"P20260519002","prescId":"CF20260519002","totalAmount":35.00,"insurType":"URBMI"}'],
+        ['请求内容','{"patientId":"P20260519002","prescNo":"CF20260519002","insurType":"URBMI"}'],
         ['响应时间','—（无响应）'],
         ['响应内容','—'],
         ['平台接收时间','2026-05-19 09:41:05'],
         ['耗时','超时 5000ms']
       ]},
-      {title:'报错信息', type:'error', content:'ConnectTimeoutError: 连接HIS服务器 10.1.2.100:8080 超时\n等待 5000ms 无响应\n\n[09:41:08] 自动重试第1次... 超时\n[09:41:12] 自动重试第2次... 超时\n\n已达最大重试次数(2)，流程中断。\n后续环节（发药、库存扣减）被阻塞。\n\n网络诊断：\nping 10.1.2.100 → 超时\ntelnet 10.1.2.100:8080 → 连接被拒绝\n建议：联系HIS运维检查结算服务状态'}
+      {title:'报错信息', type:'error', content:'ConnectTimeoutError: 连接HIS服务器 10.1.2.100:8080 超时\n等待 5000ms 无响应\n\n[09:41:08] 自动重试第1次... 超时\n[09:41:12] 自动重试第2次... 超时\n\n已达最大重试次数(2)，流程中断。\n后续环节（发药/库存扣减）被阻塞。\n\n异常发生在第3个接口（FY_MZ_ShouFeiYJSFQ 门诊预结算服务发起）\n前2个接口（FY_MZ_ChaXun、FY_MZ_DaiJieSFYCX）调用正常。\n\n网络诊断：\nping 10.1.2.100 → 超时\ntelnet 10.1.2.100:8080 → 连接被拒绝\n建议：联系HIS运维检查结算服务状态'}
     ]},
     6: {title:'发药/库存扣减', status:'pending', sections:[
       {title:'等待信息', type:'pending', content:'该环节尚未执行。\n原因：前置环节「结算」异常中断，流程被阻塞。'}
@@ -628,12 +718,12 @@ const LOG_DATA = {
         ['患者ID','P20260519003'],
         ['识别结果','匹配成功']
       ]},
-      {title:'接口调用详情', type:'table', rows:[
-        ['请求地址','POST https://his.hospital.com/api/patient/identify'],
+      {title:'接口调用详情 - BR_DA_DangAnCX 病人档案信息查询', type:'table', rows:[
+        ['请求地址','POST https://his.hospital.com/api/BR_DA_DangAnCX'],
         ['请求头','Content-Type: application/json; Authorization: Bearer ***'],
         ['请求内容','{"cardNo":"320282199308089012","identifyType":"qrcode","deviceId":"DEV-003"}'],
         ['响应时间','2026-05-19 10:04:50'],
-        ['响应内容','{"code":200,"patientId":"P20260519003","name":"王五","insurType":"UEBMI"}'],
+        ['响应内容','{"code":200,"patientId":"P20260519003","name":"王五","insurType":"UEBMI","gender":"女","age":33}'],
         ['平台接收时间','2026-05-19 10:04:50'],
         ['耗时','55ms']
       ]}
@@ -649,9 +739,9 @@ const LOG_DATA = {
         ['采集方式','设备自动读取'],
         ['采集设备','欧姆龙 HBP-1300 + 红外体温枪']
       ]},
-      {title:'接口调用详情', type:'table', rows:[
-        ['请求地址','POST https://his.hospital.com/api/vitals/upload'],
-        ['请求头','Content-Type: application/json; Authorization: Bearer ***'],
+      {title:'接口调用详情 - 内部接口 体征数据上传', type:'table', rows:[
+        ['请求地址','POST https://platform.internal/api/vitals/upload'],
+        ['请求头','Content-Type: application/json; X-Device-Id: DEV-003'],
         ['请求内容','{"patientId":"P20260519003","bp":"118/75","heartRate":68,"temp":36.4,"weight":58,"height":162}'],
         ['响应时间','2026-05-19 10:05:12'],
         ['响应内容','{"code":200,"vitalId":"VT003","msg":"体征数据上传成功"}'],
@@ -670,10 +760,28 @@ const LOG_DATA = {
         ['号源序号','第 11 号'],
         ['预计等候','约 8 分钟']
       ]},
-      {title:'接口调用详情', type:'table', rows:[
-        ['请求地址','POST https://his.hospital.com/api/register'],
+      {title:'接口调用详情 - JZ_GH_PaiBanXXCX 排班信息查询', type:'table', rows:[
+        ['请求地址','POST https://his.hospital.com/api/JZ_GH_PaiBanXXCX'],
         ['请求头','Content-Type: application/json; Authorization: Bearer ***'],
-        ['请求内容','{"patientId":"P20260519003","deptCode":"WSS","doctorId":"D012","regType":"normal"}'],
+        ['请求内容','{"deptCode":"WSS","scheduleDate":"2026-05-19"}'],
+        ['响应时间','2026-05-19 10:05:25'],
+        ['响应内容','{"code":200,"schedules":[{"doctorId":"D012","doctorName":"刘医生","totalSlots":20,"usedSlots":10}]}'],
+        ['平台接收时间','2026-05-19 10:05:25'],
+        ['耗时','68ms']
+      ]},
+      {title:'接口调用详情 - JZ_GH_PaiBanHYXXCX 排班号源信息查询', type:'table', rows:[
+        ['请求地址','POST https://his.hospital.com/api/JZ_GH_PaiBanHYXXCX'],
+        ['请求头','Content-Type: application/json; Authorization: Bearer ***'],
+        ['请求内容','{"doctorId":"D012","scheduleDate":"2026-05-19"}'],
+        ['响应时间','2026-05-19 10:05:30'],
+        ['响应内容','{"code":200,"availableSlot":11,"timeRange":"10:00-10:30"}'],
+        ['平台接收时间','2026-05-19 10:05:30'],
+        ['耗时','55ms']
+      ]},
+      {title:'接口调用详情 - JZ_GH_YuYueFQ 挂号预约发起', type:'table', rows:[
+        ['请求地址','POST https://his.hospital.com/api/JZ_GH_YuYueFQ'],
+        ['请求头','Content-Type: application/json; Authorization: Bearer ***'],
+        ['请求内容','{"patientId":"P20260519003","doctorId":"D012","deptCode":"WSS","slotNo":11}'],
         ['响应时间','2026-05-19 10:05:38'],
         ['响应内容','{"code":200,"regNo":"GH20260519003","deptName":"卫生室","doctorName":"刘医生","fee":10.00}'],
         ['平台接收时间','2026-05-19 10:05:38'],
@@ -691,9 +799,9 @@ const LOG_DATA = {
         ['医生签名','—'],
         ['录像存档','录制中']
       ]},
-      {title:'接口调用详情', type:'table', rows:[
-        ['请求地址','POST https://his.hospital.com/api/consultation/video-start'],
-        ['请求头','Content-Type: application/json; Authorization: Bearer ***'],
+      {title:'接口调用详情 - 内部接口 视频问诊会话', type:'table', rows:[
+        ['请求地址','POST https://platform.internal/api/consultation/video-start'],
+        ['请求头','Content-Type: application/json; X-Session-Token: ***'],
         ['请求内容','{"visitId":"VIS20260519003","doctorId":"D012","patientId":"P20260519003","roomId":"ROOM-0519-07"}'],
         ['响应时间','2026-05-19 10:06:20'],
         ['响应内容','{"code":200,"sessionId":"VS003","status":"in_progress","msg":"视频通话已建立"}'],
